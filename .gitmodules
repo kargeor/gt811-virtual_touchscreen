@@ -1,0 +1,6 @@
+[submodule "virtual_touchscreen"]
+	path = virtual_touchscreen
+	url = https://github.com/vi/virtual_touchscreen
+[submodule "GT811"]
+	path = GT811
+	url = https://github.com/levkovigor/GT811
