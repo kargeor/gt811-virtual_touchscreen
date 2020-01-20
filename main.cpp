@@ -21,7 +21,8 @@ void GT811::begin() {
 }
 
 uint16_t GT811::poll(void) {
-  // TODO: Check INT pin
+  // Maybe check INT pin?
+
   buf[0] = GT811_REGISTERS_READ >> 8;
   buf[1] = GT811_REGISTERS_READ & 0xFF;
   write(fd, buf, 2);
@@ -31,13 +32,23 @@ uint16_t GT811::poll(void) {
     return 0;
   }
 
+  // this is the reserved area
+  for (int i = 18; i < 28; i++)
+    buf[i] = buf[i + 6];
+
   int tpFlag = buf[0];
-  int touchCount = 0;
-  while (tpFlag) {
-    touchCount += tpFlag & 1;
-    tpFlag >>= 1;
+
+  for (int i = 0; i < 5; i++) {
+    if ((tpFlag >> i) & 1) {
+      touchX[i] = (buf[(i * 5) + 2] << 8) | (buf[(i * 5) + 3] & 0xFF);
+      touchY[i] = (buf[(i * 5) + 4] << 8) | (buf[(i * 5) + 5] & 0xFF);
+      touchPressure[i] = buf[(i * 5) + 6];
+
+      printf("Pos[%d]: (%d, %d) Pres %d\n", i, touchX[i], touchY[i], touchPressure[i]);
+    }
   }
-  printf("Touch count = %d\n", touchCount);
+
+  return 0;
 }
 
 ///// BEGIN OF TS POINT
@@ -81,14 +92,9 @@ int main() {
   GT811 gt811(0, 0);
   gt811.begin();
 
-  gt811.poll();
-  gt811.poll();
-  gt811.poll();
-  gt811.poll();
-  gt811.poll();
-  gt811.poll();
-  gt811.poll();
-  gt811.poll();
+  while (1) {
+    gt811.poll();
+  }
 
   close(fd);
   return 0;
