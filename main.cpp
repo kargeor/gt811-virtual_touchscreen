@@ -2,15 +2,21 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <unistd.h>
+#include <wiringPi.h>
 #include <wiringPiI2C.h>
 
 #include "GT811.h"
 
 static uint8_t buf[1024];
 static int fd;
+
 static const int READ_SIZE = 34;
+static const int PIN_INT = 7; // GPIO04 (Pin 7)
+
 static FILE *cmdOut = stdout;
 static int debugMode = 0;
+
+static GT811 gt811(0, 0);
 
 GT811::GT811(uint16_t _RST, uint16_t _INT) {
   touchPressure[0] = 0;
@@ -110,6 +116,9 @@ bool TS_Point::operator!=(TS_Point p1) {
 }
 ///// END OF TS POINT
 
+void pin_int_handler(void) {
+  gt811.poll();
+}
 
 int main(int argc, char **argv) {
   int c;
@@ -133,6 +142,16 @@ int main(int argc, char **argv) {
     }
   }
 
+  wiringPiSetup();
+  pinMode(PIN_INT, INPUT);
+  wiringPiISR(PIN_INT, INT_EDGE_FALLING, pin_int_handler);
+
+  if (piHiPri(99) == -1) {
+    fprintf(stderr, "Set priority failed\n");
+  } else {
+    fprintf(stderr, "Set priority OK\n");
+  }
+
   // result of "i2cdetect -y 1"
   fd = wiringPiI2CSetup(0x5d);
   if (fd == -1) {
@@ -140,11 +159,10 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  GT811 gt811(0, 0);
   gt811.begin();
 
   while (1) {
-    gt811.poll();
+    sleep(1);
   }
 
   close(fd);
