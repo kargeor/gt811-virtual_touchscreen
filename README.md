@@ -30,3 +30,15 @@ Open I2C and write coordinates to screen with debug output:
 Send to kernel module:
 `sudo ./gt811-virtual_touchscreen -o /dev/virtual_touchscreen`
 
+
+## Run on boot
+1. `sudo cp gt811-virtual_touchscreen /usr/bin/gt811-virtual_touchscreen`
+2. Install the provided script in `init.d`
+
+## unclutter-xfixes
+1. `git clone https://github.com/Airblader/unclutter-xfixes.git`
+1. `cd unclutter-xfixes`
+1. `make`
+1. `sudo cp unclutter /usr/bin/unclutter`
+1. `DISPLAY=:0 unclutter --hide-on-touch` (temporary)
+1. For permanent...
