@@ -15,4 +15,18 @@ Make, GCC, Wiring PI and kernel module build files.
 1. `cd virtual_touchscreen`
 1. `make`
 
-## Install Instructions
+### Testing
+Open I2C and write coordinates to screen with debug output:
+`sudo ./gt811-virtual_touchscreen -d`
+
+## Kernel Module Install Instructions
+1. ```sudo cp virtual_touchscreen.ko /lib/modules/`uname -r`/kernel/drivers/input/misc/``` -- you might need to select a different location based on your linux install
+1. `sudo depmod`
+1. `sudo modprobe virtual_touchscreen` -- this only stays until reboot
+1. Add `virtual_touchscreen` to `/etc/modules` to auto load
+1. Check: `lsmod | grep virtual_touchscreen`
+
+### Testing
+Send to kernel module:
+`sudo ./gt811-virtual_touchscreen -o /dev/virtual_touchscreen`
+
